@@ -3,10 +3,10 @@ from flask import Flask, g, request
 from psycopg2.extras import DictCursor
 
 from accounting.core.entities import Material
-from accounting.service.service import create_materials, PetrolStationService
+from accounting.service.service import AccountingService
 
 app = Flask(__name__)
-petrolStationService: PetrolStationService = None
+petrolStationService: AccountingService = None
 
 
 @app.before_request
@@ -19,7 +19,7 @@ def before_request():
     g.cur = g.connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     global petrolStationService
-    petrolStationService = PetrolStationService(g.connection, g.cur)
+    petrolStationService = AccountingService(g.connection, g.cur)
 
 
 @app.route('/material', methods=['POST'])
@@ -28,7 +28,7 @@ def load_chart_data():
     params = request.get_json()
 
     materials = [Material(param) for param in params]
-    create_materials(materials)
+    petrolStationService.create_materials(materials)
 
     return json_response(str(r))
 
