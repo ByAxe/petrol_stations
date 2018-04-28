@@ -3,9 +3,10 @@ from flask import Flask, g, request
 from psycopg2.extras import DictCursor
 
 from accounting.core.entities import Material
-from accounting.service.service import create_materials
+from accounting.service.service import create_materials, PetrolStationService
 
 app = Flask(__name__)
+petrolStationService: PetrolStationService = None
 
 
 @app.before_request
@@ -16,6 +17,9 @@ def before_request():
     """
     g.connection = psycopg2.connect(app.config['DATABASE_NAME'])
     g.cur = g.connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    global petrolStationService
+    petrolStationService = PetrolStationService(g.connection, g.cur)
 
 
 @app.route('/material', methods=['POST'])
