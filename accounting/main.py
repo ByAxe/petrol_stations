@@ -1,6 +1,6 @@
 import os
 
-from accounting.controller import app
+from accounting.controller.controller import app
 
 if __name__ == '__main__':
     # app.debug = True

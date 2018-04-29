@@ -1,18 +1,14 @@
+from datetime import datetime
+
+
 class Material:
     id: int
     title: str
     description: str
     cost: float
-    petrol_station: int
 
     def __init__(self, params):
-        """
-        - Title:
-        - Description:
-        - cost:
-        :param params: parameters as dictionary
-        """
-        self.id = None
+        self.id = params['id']
         self.title = params['title']
         self.description = params['description']
         self.cost = params['cost']
@@ -22,3 +18,21 @@ class PetrolStation:
     id: int
     title: str
     location: str
+
+    def __init__(self, params):
+        self.id = params['id']
+        self.title = params['title']
+        self.location = params['location']
+
+
+class MaterialsOnPetrolStation:
+    materials: dict
+    petrol_station: PetrolStation
+    date_of_incoming: datetime
+    number: int
+
+    def __init__(self, params):
+        self.materials = params['materials']
+        self.petrol_station = params['petrol_station']
+        self.date_of_incoming = params['date_of_incoming']
+        self.number = params['number']

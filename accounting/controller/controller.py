@@ -2,11 +2,12 @@ import psycopg2
 from flask import Flask, g, request
 from psycopg2.extras import DictCursor
 
-from accounting.core.entities import Material
+from accounting.core.entities import Material, PetrolStation
+from accounting.core.utils import json_response
 from accounting.service.service import AccountingService
 
 app = Flask(__name__)
-petrolStationService: AccountingService = None
+accounting_service: AccountingService = None
 
 
 @app.before_request
@@ -18,29 +19,45 @@ def before_request():
     g.connection = psycopg2.connect(app.config['DATABASE_NAME'])
     g.cur = g.connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    global petrolStationService
-    petrolStationService = AccountingService(g.connection, g.cur)
+    global accounting_service
+    accounting_service = AccountingService(g.connection, g.cur)
 
 
 @app.route('/material', methods=['POST'])
-def load_chart_data():
+def create_materials():
     # Extract incoming params from request
     params = request.get_json()
 
     materials = [Material(param) for param in params]
-    petrolStationService.create_materials(materials)
+    accounting_service.create_materials(materials)
 
-    return json_response(str(r))
+    return json_response()
 
 
-@app.route('/public/chartdata', methods=['DELETE'])
-def deleteChartData():
-    main_currency = request.args['main_currency'] if 'main_currency' in request.args else None
-    secondary_currency = request.args['secondary_currency'] if 'secondary_currency' in request.args else None
-    start = request.args['start'] if 'start' in request.args else None
-    end = request.args['end'] if 'end' in request.args else None
-    period = request.args['period'] if 'period' in request.args else None
+@app.route('/material/<int:id>', methods=['GET'])
+def get_material(id):
+    material = accounting_service.get_material(id)
+    return json_response(str(material))
 
-    poloniexPublicService.deleteChartData(main_currency, secondary_currency, start, end, period)
+
+@app.route('/material/title/<string:title>', methods=['DELETE'])
+def get_material(title):
+    accounting_service.remove_material_by_title(title)
+    return json_response()
+
+
+@app.route('/material/id/<int:id>', methods=['DELETE'])
+def get_material(id):
+    accounting_service.remove_material_by_id(id)
+    return json_response()
+
+
+@app.route('/petrolstation', methods=['POST'])
+def create_petrol_station():
+    # Extract incoming params from request
+    params = request.get_json()
+
+    materials = [PetrolStation(param) for param in params]
+    accounting_service.create_materials(materials)
 
     return json_response()
