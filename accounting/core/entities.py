@@ -8,7 +8,7 @@ class Material:
     cost: float
 
     def __init__(self, params):
-        self.id = params['id']
+        self.id = params['id'] if 'id' in params else None
         self.title = params['title']
         self.description = params['description']
         self.cost = params['cost']

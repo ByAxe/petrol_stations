@@ -15,7 +15,7 @@ STATIONS_INSERT_PLAN_SQL = """
 PREPARE station_insert_plan AS
     INSERT INTO accounting.petrol_stations
     (title, location)
-    VALUES ($1, $2, $3)"""
+    VALUES ($1, $2)"""
 
 MATERIALS_STATIONS_INSERT_PLAN_SQL = """
 PREPARE materials_stations_insert_plan AS

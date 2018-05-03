@@ -10,8 +10,8 @@ app = Flask(__name__)
 accounting_service: AccountingService = None
 
 
-@app.before_request
-def before_request():
+@app.before_first_request
+def before_first_request():
     """
     Initializes everything before the first request
     Works similar to post-construct phase in Java
@@ -40,14 +40,14 @@ def get_material(id):
     return json_response(str(material))
 
 
-@app.route('/material/title/<string:title>', methods=['DELETE'])
-def get_material(title):
-    accounting_service.remove_material_by_title(title)
-    return json_response()
+@app.route('/material', methods=['GET'])
+def get_materials():
+    materials = accounting_service.get_materials()
+    return json_response(str(materials))
 
 
-@app.route('/material/id/<int:id>', methods=['DELETE'])
-def get_material(id):
+@app.route('/material/<int:id>', methods=['DELETE'])
+def remove_material(id):
     accounting_service.remove_material_by_id(id)
     return json_response()
 
@@ -61,3 +61,21 @@ def create_petrol_station():
     accounting_service.create_materials(materials)
 
     return json_response()
+
+
+@app.route('/petrolstation/<int:id>', methods=['DELETE'])
+def remove_petrol_station(id):
+    accounting_service.remove_petrol_station(id)
+    return json_response()
+
+
+@app.route('/petrolstation/<int:id>', methods=['GET'])
+def get_petrol_station(id):
+    petrol_station = accounting_service.get_petrol_station(id)
+    return json_response(str(petrol_station))
+
+
+@app.route('/petrolstation', methods=['GET'])
+def get_petrol_stations():
+    petrol_stations = accounting_service.get_petrol_stations()
+    return json_response(str(petrol_stations))

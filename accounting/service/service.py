@@ -28,16 +28,9 @@ class AccountingService:
 
     def get_materials(self):
         sql = "SELECT * FROM accounting.materials"
-        self.cursor.execute(sql, id)
+        self.cursor.execute(sql)
         materials = self.cursor.fetchall()
         return [Material(material) for material in materials]
-
-    def remove_material_by_title(self, title):
-        sql = "DELETE FROM accounting.materials WHERE title = %s"
-
-        self.cursor.execute(sql, title)
-
-        self.connection.commit()
 
     def remove_material_by_id(self, title):
         sql = "DELETE FROM accounting.materials WHERE title = %s"
@@ -51,16 +44,14 @@ class AccountingService:
 
         # actual insert into DB
         for material in materials:
-            self.cursor.execute(sql, (material['title'],
-                                      material['description'],
-                                      material['cost']))
+            self.cursor.execute(sql, (material.title, material.description, material.cost))
 
         self.connection.commit()
 
-    def remove_petrol_station(self, title, location):
-        sql = "DELETE FROM accounting.petrol_stations WHERE title = %s AND location = %s"
+    def remove_petrol_station(self, id):
+        sql = "DELETE FROM accounting.petrol_stations WHERE id = %i"
 
-        self.cursor.execute(sql, (title, location))
+        self.cursor.execute(sql, id)
 
         self.connection.commit()
 
@@ -79,6 +70,12 @@ class AccountingService:
         self.cursor.execute(sql, id)
         petrol_station = self.cursor.fetchall()
         return PetrolStation(petrol_station)
+
+    def get_petrol_stations(self):
+        sql = "SELECT * FROM accounting.petrol_stations"
+        self.cursor.execute(sql)
+        petrol_stations = self.cursor.fetchall()
+        return [PetrolStation(petrol_station) for petrol_station in petrol_stations]
 
     def get_materials_on_petrol_station(self, petrol_station_id, material_id) -> list:
         self.cursor.execute(
@@ -111,15 +108,14 @@ class AccountingService:
         # If there is already present target material on station --> update amount
         if materials_on_petrol_station:
             sql = "EXECUTE materials_stations_update_number_plan (%f, %i, %i)"
-
-            self.cursor.execute(sql,
-                                (number + float(materials_on_petrol_station[0]['number']), material_id,
-                                 petrol_station_id))
+            resulting_number = number + float(materials_on_petrol_station[0]['number'])
+            self.cursor.execute(sql, (resulting_number, material_id, petrol_station_id))
 
         # Insert record
         else:
             sql = "EXECUTE materials_stations_insert_plan (%i, %i, %f)"
-            self.cursor.execute(sql, material_id, petrol_station_id, number)
+
+            self.cursor.execute(sql, (material_id, petrol_station_id, number))
 
         self.connection.commit()
 
