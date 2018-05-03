@@ -26,6 +26,7 @@ CREATE TABLE accounting.materials_stations (
   material_id       BIGINT REFERENCES accounting.materials,
   petrol_station_id BIGINT REFERENCES accounting.petrol_stations,
   date_of_incoming  TIMESTAMP DEFAULT now(),
-  number            FLOAT
+  number            FLOAT,
+  PRIMARY KEY (material_id, petrol_station_id, date_of_incoming)
 );
 
