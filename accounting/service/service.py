@@ -1,6 +1,6 @@
 from psycopg2.extras import DictCursor
 
-from accounting.core.entities import Material, PetrolStation
+from accounting.core.entities import PetrolStation
 from accounting.core.utils import *
 
 
@@ -21,21 +21,21 @@ class AccountingService:
         self.connection.commit()
 
     def get_material(self, id):
-        sql = "SELECT * FROM accounting.materials WHERE id = %i"
-        self.cursor.execute(sql, id)
-        material = self.cursor.fetchall()
-        return Material(material)
+        sql = "SELECT * FROM accounting.materials WHERE id = %s"
+        self.cursor.execute(sql, str(id))
+        material = self.cursor.fetchall()[0]
+        return material
 
-    def get_materials(self):
+    def get_materials(self) -> list:
         sql = "SELECT * FROM accounting.materials"
         self.cursor.execute(sql)
         materials = self.cursor.fetchall()
-        return [Material(material) for material in materials]
+        return materials
 
-    def remove_material_by_id(self, title):
-        sql = "DELETE FROM accounting.materials WHERE title = %s"
+    def remove_material(self, id):
+        sql = "DELETE FROM accounting.materials WHERE id = %s"
 
-        self.cursor.execute(sql, title)
+        self.cursor.execute(sql, str(id))
 
         self.connection.commit()
 
@@ -60,8 +60,8 @@ class AccountingService:
 
         # actual insert into DB
         for petrol_station in petrol_stations:
-            self.cursor.execute(sql, (petrol_station['title'],
-                                      petrol_station['location']))
+            self.cursor.execute(sql, (petrol_station.title,
+                                      petrol_station.location))
 
         self.connection.commit()
 

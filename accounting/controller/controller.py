@@ -40,7 +40,7 @@ def get_material(id):
     return json_response(str(material))
 
 
-@app.route('/material', methods=['GET'])
+@app.route('/materials', methods=['GET'])
 def get_materials():
     materials = accounting_service.get_materials()
     return json_response(str(materials))
@@ -48,7 +48,7 @@ def get_materials():
 
 @app.route('/material/<int:id>', methods=['DELETE'])
 def remove_material(id):
-    accounting_service.remove_material_by_id(id)
+    accounting_service.remove_material(id)
     return json_response()
 
 
@@ -57,8 +57,8 @@ def create_petrol_station():
     # Extract incoming params from request
     params = request.get_json()
 
-    materials = [PetrolStation(param) for param in params]
-    accounting_service.create_materials(materials)
+    petrol_stations = [PetrolStation(param) for param in params]
+    accounting_service.create_petrol_stations(petrol_stations)
 
     return json_response()
 
