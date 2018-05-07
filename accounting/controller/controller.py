@@ -34,19 +34,19 @@ def create_materials():
     return json_response()
 
 
-@app.route('/material/<int:id>', methods=['GET'])
+@app.route('/material/<string:id>', methods=['GET'])
 def get_material(id):
     material = accounting_service.get_material(id)
     return json_response(str(material))
 
 
-@app.route('/materials', methods=['GET'])
+@app.route('/material', methods=['GET'])
 def get_materials():
     materials = accounting_service.get_materials()
     return json_response(str(materials))
 
 
-@app.route('/material/<int:id>', methods=['DELETE'])
+@app.route('/material/<string:id>', methods=['DELETE'])
 def remove_material(id):
     accounting_service.remove_material(id)
     return json_response()
@@ -63,13 +63,13 @@ def create_petrol_station():
     return json_response()
 
 
-@app.route('/petrolstation/<int:id>', methods=['DELETE'])
+@app.route('/petrolstation/<string:id>', methods=['DELETE'])
 def remove_petrol_station(id):
     accounting_service.remove_petrol_station(id)
     return json_response()
 
 
-@app.route('/petrolstation/<int:id>', methods=['GET'])
+@app.route('/petrolstation/<string:id>', methods=['GET'])
 def get_petrol_station(id):
     petrol_station = accounting_service.get_petrol_station(id)
     return json_response(str(petrol_station))
@@ -79,3 +79,29 @@ def get_petrol_station(id):
 def get_petrol_stations():
     petrol_stations = accounting_service.get_petrol_stations()
     return json_response(str(petrol_stations))
+
+
+@app.route('/petrolstation/<string:petrol_station_id>/material', methods=['GET'])
+def get_materials_on_petrol_station(petrol_station_id):
+    materials = accounting_service.get_materials_on_petrol_station(petrol_station_id)
+    return json_response(str(materials))
+
+
+@app.route('/petrolstation/<string:petrol_station_id>/material/<string:material_id>', methods=['GET'])
+def get_material_on_petrol_station(petrol_station_id, material_id):
+    material = accounting_service.get_material_on_petrol_station(petrol_station_id, material_id)
+    return json_response(str(material))
+
+
+@app.route('/petrolstation/<string:petrol_station_id>/material/<string:material_id>/add/<string:number>',
+           methods=['PUT'])
+def add_material_to_petrol_station(petrol_station_id, material_id, number):
+    accounting_service.add_material_to_petrol_station(petrol_station_id, material_id, number)
+    return json_response()
+
+
+@app.route('/petrolstation/<string:petrol_station_id>/material/<string:material_id>/take/<string:number>',
+           methods=['PUT'])
+def take_material_from_petrol_station(petrol_station_id, material_id, number):
+    accounting_service.take_material_from_petrol_station(petrol_station_id, material_id, number)
+    return json_response()

@@ -1,6 +1,5 @@
 from psycopg2.extras import DictCursor
 
-from accounting.core.entities import PetrolStation
 from accounting.core.utils import *
 
 
@@ -49,7 +48,7 @@ class AccountingService:
         self.connection.commit()
 
     def remove_petrol_station(self, id):
-        sql = "DELETE FROM accounting.petrol_stations WHERE id = %i"
+        sql = "DELETE FROM accounting.petrol_stations WHERE id = %s"
 
         self.cursor.execute(sql, id)
 
@@ -66,20 +65,28 @@ class AccountingService:
         self.connection.commit()
 
     def get_petrol_station(self, id):
-        sql = "SELECT * FROM accounting.petrol_stations WHERE id = %i"
+        sql = "SELECT * FROM accounting.petrol_stations WHERE id = %s"
         self.cursor.execute(sql, id)
         petrol_station = self.cursor.fetchall()
-        return PetrolStation(petrol_station)
+        return petrol_station
 
     def get_petrol_stations(self):
         sql = "SELECT * FROM accounting.petrol_stations"
         self.cursor.execute(sql)
         petrol_stations = self.cursor.fetchall()
-        return [PetrolStation(petrol_station) for petrol_station in petrol_stations]
+        return petrol_stations
 
-    def get_materials_on_petrol_station(self, petrol_station_id, material_id) -> list:
+    def get_materials_on_petrol_station(self, petrol_station_id):
+        self.cursor.execute("SELECT * FROM accounting.materials_stations WHERE petrol_station_id = %s",
+                            petrol_station_id)
+
+        response: list = self.cursor.fetchall()
+
+        return response
+
+    def get_material_on_petrol_station(self, petrol_station_id, material_id) -> list:
         self.cursor.execute(
-            "SELECT * FROM accounting.materials_stations WHERE petrol_station_id = %i AND material_id = %i",
+            "SELECT * FROM accounting.materials_stations WHERE petrol_station_id = %s AND material_id = %s",
             (petrol_station_id, material_id))
 
         response: list = self.cursor.fetchall()
@@ -92,9 +99,9 @@ class AccountingService:
         if not materials_on_petrol_station:
             return "Nothing was taken. Current petrol station does not have any number of this material"
         else:
-            sql = "EXECUTE materials_stations_update_number_plan (%f, %i, %i)"
+            sql = "EXECUTE materials_stations_update_number_plan (%s, %s, %s)"
 
-            resulting_number = float(materials_on_petrol_station[0]['number']) - number
+            resulting_number = materials_on_petrol_station[0]['number'] - float(number)
             if resulting_number < 0:
                 self.remove_material_from_petrol_station(petrol_station_id, material_id)
             else:
@@ -103,24 +110,24 @@ class AccountingService:
         self.connection.commit()
 
     def add_material_to_petrol_station(self, petrol_station_id, material_id, number):
-        materials_on_petrol_station = self.get_materials_on_petrol_station(petrol_station_id, material_id)
+        materials_on_petrol_station = self.get_material_on_petrol_station(petrol_station_id, material_id)
 
         # If there is already present target material on station --> update amount
         if materials_on_petrol_station:
-            sql = "EXECUTE materials_stations_update_number_plan (%f, %i, %i)"
-            resulting_number = number + float(materials_on_petrol_station[0]['number'])
+            sql = "EXECUTE materials_stations_update_number_plan (%s, %s, %s)"
+            resulting_number = float(number) + materials_on_petrol_station[0]['number']
             self.cursor.execute(sql, (resulting_number, material_id, petrol_station_id))
 
         # Insert record
         else:
-            sql = "EXECUTE materials_stations_insert_plan (%i, %i, %f)"
+            sql = "EXECUTE materials_stations_insert_plan (%s, %s, %s)"
 
             self.cursor.execute(sql, (material_id, petrol_station_id, number))
 
         self.connection.commit()
 
     def remove_material_from_petrol_station(self, petrol_station_id, material_id):
-        sql = "DELETE FROM accounting.materials_stations WHERE petrol_station_id = %i AND material_id = %i"
+        sql = "DELETE FROM accounting.materials_stations WHERE petrol_station_id = %s AND material_id = %s"
 
         self.cursor.execute(sql, (material_id, petrol_station_id))
 
